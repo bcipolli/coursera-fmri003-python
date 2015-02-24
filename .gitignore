@@ -5,6 +5,7 @@ MoAEpilot_preproc/
 # Junk
 .DS_Store
 *.sublime*
+*.nii
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

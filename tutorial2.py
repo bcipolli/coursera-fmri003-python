@@ -13,7 +13,7 @@ import numpy as np
 import os
 
 import nibabel
-from nilearn.input_data import NiftiMasker
+from nilearn.image import index_img
 from nipy.modalities.fmri import design_matrix
 from nipy.modalities.fmri.experimental_paradigm import BlockParadigm
 from nipy.modalities.fmri.glm import FMRILinearModel
@@ -91,9 +91,11 @@ fmri_glm = FMRILinearModel(func_img, dmat.matrix,
                            mask='compute')
 fmri_glm.fit(do_scaling=True, model='ar1')
 
+
 ########################################
 # Output beta and variance images
 ########################################
+
 beta_hat = fmri_glm.glms[0].get_beta()  # Least-squares estimates of the beta
 variance_hat = fmri_glm.glms[0].get_mse()  # Estimates of the variance
 mask = fmri_glm.mask.get_data() > 0
@@ -114,7 +116,7 @@ variance_map[mask] = variance_hat
 
 # Create a snapshots of the variance image contrasts
 vmax = np.log(variance_hat.max())
-plot_map(func_img.get_data()[..., 0], func_img.affine, title='Original data (t=0)')
+# plot_map(func_img.get_data()[..., 0], func_img.affine, title='Original data (t=0)')
 plot_map(np.log(variance_map + .1),
          fmri_glm.affine,
          cmap=cm.hot_black_bone,
@@ -124,11 +126,31 @@ plot_map(np.log(variance_map + .1),
          threshold=.1, alpha=.9,
          title='Estimates of the variance.')
 
+########################################
+# Output all beta images, and time series change
+########################################
+
 # Show beta map for each beta
 fh = plt.figure()
-mask = NiftiMasker()
-mask.fit(func_img)
 for pi in range(len(dmat.names)):
     ax = fh.add_subplot(3, 4, pi + 1)
     plot_map(beta_map[..., pi], fmri_glm.affine, title=dmat.names[pi], axes=ax)
+plt.show()
+
+# Define things of interest
+z_slice_idx = 39  # 40th image
+time_idx = 29  # 30th time point
+vox_idx = (19, 19, z_slice_idx)
+
+#########################################
+# Estimate the contrasts
+#########################################
+# From http://cogmaster-stats.github.io/python-cogstats/auto_examples/plot_localizer_analysis.html
+
+z_map, = fmri_glm.contrast(np.ones(11), 1, output_z=True)
+vmax = max(-z_map.get_data().min(), z_map.get_data().max())
+plot_map(z_map.get_data(), z_map.get_affine(),
+         cmap=cm.cold_hot, vmin=-vmax, vmax=vmax,
+         slicer='z', black_bg=True, threshold=2.5,
+         title='Contrast')
 plt.show()

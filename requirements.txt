@@ -1,3 +1,4 @@
 nibabel>=1.1
 nilearn>=0.1
 matplotlib>=1.1
+nipy>=0.3

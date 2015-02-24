@@ -1,5 +1,10 @@
 # Files for tutorials
 MoAEpilot/
+MoAEpilot_preproc/
+
+# Junk
+.DS_Store
+*.sublime*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

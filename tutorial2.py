@@ -1,0 +1,71 @@
+"""
+"Simple GLM analysis in R" fMRI tutorial in Coursera course fmri003
+https://class.coursera.org/fmri-003/wiki/Simple_GLM_analysis_in_R
+
+To run this tutorial, download data and unzip into this directory.
+https://d396qusza40orc.cloudfront.net/fmri/MoAEpilot_preproc.zip
+"""
+# Created by: Ben Cipollini <bcipolli@ucsd.edu>
+
+import glob
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+
+import nibabel
+from nipy.modalities.fmri import design_matrix
+from nipy.modalities.fmri.experimental_paradigm import BlockParadigm
+
+
+# Input the functional volume
+print("Loading all functional images into a single volume...")
+data_dir = os.path.join(os.path.dirname(__file__),
+                        'MoAEpilot_preproc', 'fM00223')
+search_string = os.path.join(data_dir, 'swrfM00223_*.img')
+all_files = glob.glob(search_string)
+func_img = nibabel.funcs.concat_images(all_files)
+# Images start with 004, so slice is unnecessary.
+# func_img = index_img(func_img, slice(4))  # eliminate images 1-4
+
+# Create the design matrix
+# Used http://cogmaster-stats.github.io/python-cogstats/auto_examples/plot_localizer_analysis.html
+n_scans = 96
+n_blocks = 16
+n_events = 12
+tr = 7  # s
+
+frametimes = np.ones((n_scans,))
+con_id = np.ones((n_blocks,))  # 1=stimulation
+duration = 7 * np.ones((n_blocks,))
+onset = np.ones((n_blocks,))
+for bi in range(n_blocks):
+    onset[bi] = 0 + 13 * bi
+
+    frametimes_idx = np.arange(6) + bi * 6
+    frametimes_times = np.arange(6) + bi * 13
+    frametimes[frametimes_idx] = frametimes_times
+print frametimes
+print onset
+paradigm = BlockParadigm(con_id=con_id, onset=onset, duration=duration)
+
+motion_file = os.path.join(data_dir, 'motion.txt')
+def parse_motion(motion_file):
+    with open(motion_file, 'rb') as fp:
+        data = fp.readlines()
+    data2 = [float(v.strip()) for l in data for v in l.split(' ') if v != '']
+    data3 = np.asarray(data2).reshape(96, 6)
+    return data3
+motion_data = parse_motion(motion_file)
+motion_params = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz']
+
+X1 = design_matrix.make_dmtx(frametimes, paradigm=paradigm,
+                             hrf_model='canonical',
+                             drift_model='cosine', drift_order=2,  # quadratic
+                             add_regs=motion_data, add_reg_names=motion_params)
+
+# plot the results
+fig = plt.figure(figsize=(10, 6))
+ax = fig.gca()
+X1.show(ax=ax)
+ax.set_title('Event-related design matrix', fontsize=12)
+plt.show()

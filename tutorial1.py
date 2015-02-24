@@ -13,7 +13,6 @@ import os
 import matplotlib.pyplot as plt
 
 import nibabel
-
 from nilearn.image import index_img
 from nilearn.plotting import plot_anat, plot_stat_map
 

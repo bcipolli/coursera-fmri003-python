@@ -43,7 +43,6 @@ func_img = nibabel.funcs.concat_images(all_files)
 
 n_scans = 96
 n_blocks = 16
-n_events = 12
 tr = 7  # s
 
 frametimes = np.ones((n_scans,))
@@ -79,7 +78,7 @@ dmat = design_matrix.make_dmtx(frametimes, paradigm=paradigm,
 fig = plt.figure(figsize=(10, 6))
 ax = fig.gca()
 dmat.show(ax=ax)
-ax.set_title('Event-related design matrix', fontsize=12)
+ax.set_title('Block-related design matrix', fontsize=12)
 plt.show()
 
 ########################################

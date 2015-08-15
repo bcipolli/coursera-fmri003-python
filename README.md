@@ -5,12 +5,16 @@ Trying to implement fMRI statistics in Python for Coursera course fmri003 (given
 
 ## Dependencies:
 
-nibabel>=1.1
-nilearn>=0.1
-matplotlib>=1.1
+* nibabel>=1.1 
+* nilearn>=0.1 
+* matplotlib>=1.1 
 
 
 ## Installation
 
 After cloning this repository, install the dependencies by running:
 `sudo pip install -r requirements.txt`
+
+## Running
+
+Run `python tutorial1.py` for Tutorial 1, etc.

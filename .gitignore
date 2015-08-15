@@ -1,6 +1,8 @@
 # Files for tutorials
 MoAEpilot/
 MoAEpilot_preproc/
+nilearn_cache/
+*.zip
 
 # Junk
 .DS_Store

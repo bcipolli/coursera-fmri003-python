@@ -11,6 +11,7 @@ import glob
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import tempfile
 
 import nibabel
 from nilearn.image import index_img
@@ -23,6 +24,11 @@ this_dir = os.path.abspath(os.path.dirname(__file__))
 struct_file = os.path.join(this_dir, 'MoAEpilot/sM00223/sM00223_002.img')
 struct_img = nibabel.load(struct_file)
 
+# Convert from Analyze format to NiImg format to avoid errors later.
+struct_filename = tempfile.mkstemp()[1] + '.nii' # temp filename
+nibabel.save(struct_img, struct_filename)
+struct_img = nibabel.load(struct_filename)
+
 # output
 print("Structural image size: %s" % str(struct_img.shape))
 plot_anat(struct_img, title='Structural image')
@@ -32,7 +38,13 @@ print("Loading all functional images into a single volume...")
 all_files = glob.glob(os.path.join(this_dir, 'MoAEpilot/fM00223/*.img'))
 all_images = [nibabel.funcs.four_to_three(nibabel.load(f))[0]
               for f in all_files]
+
+# Convert from Analyze format to NiImg format to avoid errors later.
+func_filename = tempfile.mkstemp()[1] + '.nii'  # temp filename
 func_img = nibabel.funcs.concat_images(all_images)
+nibabel.save(func_img, func_filename)
+func_img = nibabel.load(func_filename)
+
 
 # Define things of interest
 z_slice_idx = 39  # 40th image

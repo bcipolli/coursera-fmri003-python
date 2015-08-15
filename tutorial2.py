@@ -19,6 +19,7 @@ from nipy.modalities.fmri import design_matrix
 from nipy.modalities.fmri.experimental_paradigm import BlockParadigm
 from nipy.modalities.fmri.glm import FMRILinearModel
 from nipy.labs.viz import plot_map, cm
+from nilearn.plotting import plot_stat_map as plot_map
 
 
 ########################################
@@ -37,6 +38,7 @@ func_filename = tempfile.mkstemp()[1] + '.nii'  # temp filename
 func_img = nibabel.funcs.concat_images(all_files)
 nibabel.save(func_img, func_filename)
 func_img = nibabel.load(func_filename)
+
 # Images start with 004, so slice is unnecessary.
 # func_img = index_img(func_img, slice(4))  # eliminate images 1-4
 
@@ -85,7 +87,6 @@ fig = plt.figure(figsize=(10, 6))
 ax = fig.gca()
 dmat.show(ax=ax)
 ax.set_title('Block-related design matrix', fontsize=12)
-plt.show()
 
 ########################################
 # Perform a GLM analysis
@@ -122,13 +123,13 @@ variance_map[mask] = variance_hat
 # Create a snapshots of the variance image contrasts
 vmax = np.log(variance_hat.max())
 # plot_map(func_img.get_data()[..., 0], func_img.affine, title='Original data (t=0)')
-plot_map(np.log(variance_map + .1),
-         fmri_glm.affine,
+var_image = nibabel.Nifti1Image(np.log(variance_map + .1),
+                                fmri_glm.affine)
+plot_map(var_image,
          cmap=cm.hot_black_bone,
-         vmin=np.log(0.1),
          vmax=vmax,
-         anat=None,
-         threshold=.1, alpha=.9,
+         threshold=.2, alpha=.9,
+         black_bg=True,
          title='Estimates of the variance.')
 
 ########################################
@@ -139,8 +140,8 @@ plot_map(np.log(variance_map + .1),
 fh = plt.figure()
 for pi in range(len(dmat.names)):
     ax = fh.add_subplot(3, 4, pi + 1)
-    plot_map(beta_map[..., pi], fmri_glm.affine, title=dmat.names[pi], axes=ax)
-plt.show()
+    cur_beta_image = nibabel.Nifti1Image(beta_map[..., pi], fmri_glm.affine)
+    plot_map(cur_beta_image, title=dmat.names[pi], axes=ax)
 
 # Define things of interest
 z_slice_idx = 39  # 40th image
@@ -154,8 +155,9 @@ vox_idx = (19, 19, z_slice_idx)
 
 z_map, = fmri_glm.contrast(np.ones(11), 1, output_z=True)
 vmax = max(-z_map.get_data().min(), z_map.get_data().max())
-plot_map(z_map.get_data(), z_map.get_affine(),
-         cmap=cm.cold_hot, vmin=-vmax, vmax=vmax,
-         slicer='z', black_bg=True, threshold=2.5,
+z_img = nibabel.Nifti1Image(z_map.get_data(), z_map.get_affine())
+plot_map(z_img,
+         cmap=cm.cold_hot, vmax=vmax,
+         black_bg=True, threshold=2.5,
          title='Contrast')
 plt.show()

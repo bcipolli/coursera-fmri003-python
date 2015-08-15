@@ -11,6 +11,7 @@ import glob
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import tempfile
 
 import nibabel
 from nilearn.image import index_img
@@ -30,7 +31,12 @@ data_dir = os.path.join(os.path.dirname(__file__),
                         'MoAEpilot_preproc', 'fM00223')
 search_string = os.path.join(data_dir, 'swrfM00223_*.img')
 all_files = glob.glob(search_string)
+
+# Convert from Analyze format to NiImg format to avoid errors later.
+func_filename = tempfile.mkstemp()[1] + '.nii'  # temp filename
 func_img = nibabel.funcs.concat_images(all_files)
+nibabel.save(func_img, func_filename)
+func_img = nibabel.load(func_filename)
 # Images start with 004, so slice is unnecessary.
 # func_img = index_img(func_img, slice(4))  # eliminate images 1-4
 

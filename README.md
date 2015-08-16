@@ -17,4 +17,5 @@ After cloning this repository, install the dependencies by running:
 
 ## Running
 
-Run `python tutorial1.py` for Tutorial 1, etc.
+Run `ipython notebook`, then browse to tutorial1 and tutorial2.
+Note that each downloads data the first time, so they may be slow to run the first time.

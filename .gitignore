@@ -3,6 +3,7 @@ MoAEpilot/
 MoAEpilot_preproc/
 nilearn_cache/
 *.zip
+.ipynb_checkpoints/
 
 # Junk
 .DS_Store
